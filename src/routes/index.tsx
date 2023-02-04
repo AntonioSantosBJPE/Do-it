@@ -3,6 +3,7 @@ import { Navigate, Route, RouteProps, Routes } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
 import { Dashboard } from "../pages/Dashboard";
 import { Login } from "../pages/Login";
+import { Register } from "../pages/Register";
 
 interface RoutesProps {}
 
@@ -19,6 +20,12 @@ export const RoutesApp = ({}: RoutesProps) => {
         path="/dashboard"
         element={accessToken ? <Dashboard /> : <Navigate to="/" />}
       />
+
+      <Route
+        path="/register"
+        element={accessToken ? <Navigate to="/dashboard" /> : <Register />}
+      />
+      {/* <Route path="/register" element={<Register />} /> */}
 
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>

@@ -6,6 +6,7 @@ import {
   UseFormRegister,
 } from "react-hook-form";
 import { FaEnvelope, FaLock } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import { SingInData } from ".";
 import { Input } from "../../components/Form/input";
 
@@ -24,6 +25,8 @@ export const LoginForm = ({
   errors,
   loading,
 }: LoginFormProps) => {
+  const navigate = useNavigate();
+
   return (
     <Grid
       as="form"
@@ -44,7 +47,7 @@ export const LoginForm = ({
             icon={FaEnvelope}
             placeholder="Digite seu login"
             label="Login"
-            type="email"
+            type="text"
             error={errors.email}
             {...register("email")}
           />
@@ -85,6 +88,10 @@ export const LoginForm = ({
           h="60px"
           borderRadius="8px"
           _hover={{ background: "gray.200" }}
+          type="button"
+          onClick={() => {
+            navigate("/register");
+          }}
         >
           Cadastrar
         </Button>
