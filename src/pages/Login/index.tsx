@@ -14,7 +14,8 @@ import { FaEnvelope, FaLock } from "react-icons/fa";
 import { SubmitHandler, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { AuthContext } from "../../contexts/AuthContext";
 
 const signInSchema = yup.object().shape({
   email: yup.string().required("Email obrigatório").email("Email inválido"),
@@ -27,6 +28,7 @@ interface SingInData {
 }
 export const Login = () => {
   const [loading, setLoading] = useState(false);
+  const { signIn } = useContext(AuthContext);
 
   const {
     formState: { errors },
@@ -37,7 +39,13 @@ export const Login = () => {
   });
 
   const handleSignIn: SubmitHandler<SingInData> = (data) => {
-    console.log(data);
+    setLoading(true);
+    signIn(data)
+      .then((_) => setLoading(false))
+      .catch((err) => {
+        console.log(err);
+        setLoading(false);
+      });
   };
   return (
     <Flex
