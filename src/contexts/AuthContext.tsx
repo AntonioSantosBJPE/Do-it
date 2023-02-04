@@ -13,6 +13,7 @@ interface AuthProviderProps {
 
 interface AuthContextData {
   signIn: (credentials: SingInCredencials) => Promise<void>;
+  signOut: () => void;
   user: User;
   accessToken: string;
 }
@@ -37,16 +38,6 @@ export const AuthContext = createContext<AuthContextData>(
   {} as AuthContextData
 );
 
-// const useAuth = () => {
-//   const context = useContext(AuthContext);
-
-//   if (context) {
-//     throw new Error("useAuth must be used within an AuthProvider");
-//   }
-
-//   return context;
-// };
-
 const AuthProvider = ({ children }: AuthProviderProps) => {
   const [data, setData] = useState<AuthState>(() => {
     const accessToken = localStorage.getItem("@Doit:acessToken");
@@ -59,10 +50,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
   });
 
   const signIn = useCallback(async ({ email, password }: SingInCredencials) => {
-    console.log({ email, password });
-
     const response = await api.post("/login", { email, password });
-    console.log(response);
     const { accessToken, user } = response.data;
 
     localStorage.setItem("@Doit:acessToken", accessToken);
@@ -70,9 +58,21 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
     setData({ accessToken, user });
   }, []);
 
+  const signOut = useCallback(() => {
+    localStorage.removeItem("@Doit:acessToken");
+    localStorage.removeItem("@Doit:user");
+
+    setData({} as AuthState);
+  }, []);
+
   return (
     <AuthContext.Provider
-      value={{ signIn, accessToken: data.accessToken, user: data.user }}
+      value={{
+        signIn,
+        signOut,
+        accessToken: data.accessToken,
+        user: data.user,
+      }}
     >
       {children}
     </AuthContext.Provider>

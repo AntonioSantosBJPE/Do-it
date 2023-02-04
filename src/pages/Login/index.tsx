@@ -16,6 +16,7 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useContext, useState } from "react";
 import { AuthContext } from "../../contexts/AuthContext";
+import { Navigate, useNavigate } from "react-router-dom";
 
 const signInSchema = yup.object().shape({
   email: yup.string().required("Email obrigatório").email("Email inválido"),
@@ -30,6 +31,8 @@ export const Login = () => {
   const [loading, setLoading] = useState(false);
   const { signIn } = useContext(AuthContext);
 
+  const navigate = useNavigate();
+
   const {
     formState: { errors },
     register,
@@ -41,9 +44,11 @@ export const Login = () => {
   const handleSignIn: SubmitHandler<SingInData> = (data) => {
     setLoading(true);
     signIn(data)
-      .then((_) => setLoading(false))
+      .then((_) => {
+        setLoading(false);
+        navigate("/dashboard");
+      })
       .catch((err) => {
-        console.log(err);
         setLoading(false);
       });
   };
