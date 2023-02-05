@@ -38,7 +38,7 @@ export const AuthContext = createContext<AuthContextData>(
   {} as AuthContextData
 );
 
-const AuthProvider = ({ children }: AuthProviderProps) => {
+export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [data, setData] = useState<AuthState>(() => {
     const accessToken = localStorage.getItem("@Doit:acessToken");
     const user = localStorage.getItem("@Doit:user");
@@ -78,5 +78,3 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
     </AuthContext.Provider>
   );
 };
-
-export { AuthProvider };

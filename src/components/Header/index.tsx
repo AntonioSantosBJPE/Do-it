@@ -12,7 +12,7 @@ export const Header = ({}: HeaderProps) => {
     <Flex
       borderBottom="1px"
       borderBottomColor="#f5f5f5"
-      paddingX="8"
+      paddingX={["4", "8"]}
       paddingY="2"
     >
       <Flex align="center">
