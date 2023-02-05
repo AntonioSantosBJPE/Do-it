@@ -23,6 +23,13 @@ interface Task {
 interface TasksContextData {
   tasks: Task[];
   createTask: (data: Omit<Task, "id">, accessToken: string) => Promise<void>;
+  loadTasks: (userId: string, accessToken: string) => Promise<void>;
+  deleteTask: (taskId: string, accessToken: string) => Promise<void>;
+  updateTask: (
+    taskId: string,
+    userId: string,
+    accessToken: string
+  ) => Promise<void>;
 }
 
 export const TasksContext = createContext<TasksContextData>(
@@ -32,9 +39,25 @@ export const TasksContext = createContext<TasksContextData>(
 export const TasksProvider = ({ children }: TasksContextProps) => {
   const [tasks, setTasks] = useState<Task[]>([]);
 
+  const loadTasks = useCallback(
+    async (userId: string, accessToken: string) => {
+      try {
+        const response = await api.get(`/tasks?userId=${userId}`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+        setTasks(response.data);
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    [tasks]
+  );
+
   const createTask = useCallback(
     async (data: Omit<Task, "id">, accessToken: string) => {
-      api
+      await api
         .post("/tasks", data, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -50,8 +73,58 @@ export const TasksProvider = ({ children }: TasksContextProps) => {
     []
   );
 
+  const deleteTask = useCallback(
+    async (taskId: string, accessToken: string) => {
+      await api
+        .delete(`/tasks/${taskId}`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        })
+        .then((response) => {
+          const filteredTasks = tasks.filter((task) => task.id !== taskId);
+          setTasks(filteredTasks);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
+    [tasks]
+  );
+
+  const updateTask = useCallback(
+    async (taskId: string, userId: string, accessToken: string) => {
+      await api
+        .patch(
+          `/tasks/${taskId}`,
+          { completed: true, userId },
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        )
+        .then((response) => {
+          const arrayTempTasks = [...tasks];
+
+          const searchId = arrayTempTasks.find((item) => item.id === taskId);
+
+          if (searchId) {
+            searchId.completed = true;
+          }
+          setTasks(arrayTempTasks);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
+    [tasks]
+  );
+
   return (
-    <TasksContext.Provider value={{ tasks, createTask }}>
+    <TasksContext.Provider
+      value={{ tasks, createTask, loadTasks, deleteTask, updateTask }}
+    >
       {children}
     </TasksContext.Provider>
   );
