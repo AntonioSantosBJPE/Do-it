@@ -18,5 +18,6 @@ export const TasksContext = createContext<TasksContextData>(
 );
 
 export const TasksProvider = ({ children }: TasksContextProps) => {
+  const [tasks, setTasks] = useState([]);
   return <TasksContext.Provider value={{}}>{children}</TasksContext.Provider>;
 };
