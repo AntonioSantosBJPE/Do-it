@@ -1,13 +1,15 @@
-import { Flex, useBreakpointValue } from "@chakra-ui/react";
+import { Flex, useBreakpointValue, useDisclosure } from "@chakra-ui/react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useContext, useState } from "react";
-import { AuthContext } from "../../contexts/AuthContext";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { RegisterForm } from "./RegisterForm";
 import { RegisterInfo } from "./RegisterInfo";
 import { GoBackButton } from "./GoBackButton";
+import { api } from "../../services/api";
+import { ModalSuccess } from "../../components/Modal/ModalSuccess";
+import { ModalError } from "../../components/Modal/ModalError";
 
 const registerSchema = yup.object().shape({
   name: yup.string().required("Nome obrigatório"),
@@ -28,7 +30,17 @@ export interface RegisterData {
 
 export const Register = () => {
   const [loading, setLoading] = useState(false);
-  // const {  } = useContext(AuthContext);
+
+  const {
+    isOpen: isModalSuccessOpen,
+    onOpen: onModalSuccessOpen,
+    onClose: onModalSuccessClose,
+  } = useDisclosure();
+  const {
+    isOpen: isModalErrorOpen,
+    onOpen: onModalErrorOpen,
+    onClose: onModalErrorClose,
+  } = useDisclosure();
 
   const isWideVersion = useBreakpointValue({
     false: false,
@@ -45,58 +57,89 @@ export const Register = () => {
     resolver: yupResolver(registerSchema),
   });
 
-  const handleRegister: SubmitHandler<RegisterData> = (data) => {
-    console.log(data);
+  const handleRegister: SubmitHandler<RegisterData> = ({
+    name,
+    email,
+    password,
+  }) => {
+    setLoading(true);
+    api
+      .post("/register", { name, email, password })
+      .then((response) => {
+        setLoading(false);
+        onModalSuccessOpen();
+      })
+      .catch((err) => {
+        setLoading(false);
+        onModalErrorOpen();
+      });
   };
 
   return (
-    <Flex
-      alignItems="center"
-      justifyContent="center"
-      padding={["10px 15px", "10px 15px", "10px 15px", "0px"]}
-      height={["auto", "auto", "100vh", "100vh"]}
-      bgGradient={[
-        "linear(to-b, purple.800 65%, white 35%)",
-        "linear(to-b, purple.800 65%, white 35%)",
-        "linear(to-l, purple.800 65%, white 35%)",
-        "linear(to-l, purple.800 65%, white 35%)",
-      ]}
-      color="white"
-    >
+    <>
+      <ModalSuccess
+        isOpen={isModalSuccessOpen}
+        onClose={onModalSuccessClose}
+        messagePrimary="Seu cadastro deu super certo, <b>vamos lá</b> !"
+        messageSecondary="Você já pode começar criando <b>suas listas</b> de tarefas agora mesmo..."
+        buttonMessage="Ir para o Login agora"
+        buttonAction={() => navigate("/")}
+      />
+      <ModalError
+        isOpen={isModalErrorOpen}
+        onClose={onModalErrorClose}
+        errorMessage="Email já está em uso!"
+        messageSecondary="Você já pode tentar novamente, <b>clicando</b> no botão acima ou aguarde alguns minutos..."
+      />
       <Flex
-        w={["100%", "100%", "90%", "70%"]}
-        justifyContent="center"
-        flexDirection={["column", "column", "row", "row"]}
         alignItems="center"
-        gap="5"
+        justifyContent="center"
+        padding={["10px 15px", "10px 15px", "10px 15px", "0px"]}
+        height={["auto", "auto", "auto ", "auto"]}
+        minHeight={["auto", "auto", "100vh", "100vh"]}
+        bgGradient={[
+          "linear(to-b, purple.800 65%, white 35%)",
+          "linear(to-b, purple.800 65%, white 35%)",
+          "linear(to-l, purple.800 65%, white 35%)",
+          "linear(to-l, purple.800 65%, white 35%)",
+        ]}
+        color="white"
       >
-        {isWideVersion ? (
-          <>
-            <GoBackButton top="50" left="35" action={() => navigate("/")} />
-            <RegisterForm
-              handleSubmit={handleSubmit}
-              handleRegister={handleRegister}
-              register={register}
-              errors={errors}
-              loading={loading}
-            />
-            <RegisterInfo />
-          </>
-        ) : (
-          <>
-            {" "}
-            <GoBackButton top="10" left="75vw" action={() => navigate("/")} />
-            <RegisterInfo />
-            <RegisterForm
-              handleSubmit={handleSubmit}
-              handleRegister={handleRegister}
-              register={register}
-              errors={errors}
-              loading={loading}
-            />
-          </>
-        )}
+        <Flex
+          w={["100%", "100%", "90%", "70%"]}
+          justifyContent="center"
+          flexDirection={["column", "column", "row", "row"]}
+          alignItems="center"
+          gap="5"
+        >
+          {isWideVersion ? (
+            <>
+              <GoBackButton top="50" left="35" action={() => navigate("/")} />
+              <RegisterForm
+                handleSubmit={handleSubmit}
+                handleRegister={handleRegister}
+                register={register}
+                errors={errors}
+                loading={loading}
+              />
+              <RegisterInfo />
+            </>
+          ) : (
+            <>
+              {" "}
+              <GoBackButton top="10" left="75vw" action={() => navigate("/")} />
+              <RegisterInfo />
+              <RegisterForm
+                handleSubmit={handleSubmit}
+                handleRegister={handleRegister}
+                register={register}
+                errors={errors}
+                loading={loading}
+              />
+            </>
+          )}
+        </Flex>
       </Flex>
-    </Flex>
+    </>
   );
 };
