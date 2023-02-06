@@ -3,6 +3,7 @@ import { Navigate, Route, RouteProps, Routes } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
 import { Dashboard } from "../pages/Dashboard";
 import { Login } from "../pages/Login";
+import { PageNotFound } from "../pages/PageNotFound";
 import { Register } from "../pages/Register";
 
 interface RoutesProps {}
@@ -27,7 +28,8 @@ export const RoutesApp = ({}: RoutesProps) => {
       />
       {/* <Route path="/register" element={<Register />} /> */}
 
-      <Route path="*" element={<Navigate to="/" />} />
+      {/* <Route path="*" element={<Navigate to="/" />} /> */}
+      <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
 };
