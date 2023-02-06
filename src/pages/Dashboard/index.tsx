@@ -1,11 +1,11 @@
-import { Box, Button, Grid, Text, useDisclosure } from "@chakra-ui/react";
+import { useDisclosure } from "@chakra-ui/react";
 import { useContext, useEffect, useState } from "react";
-import { Card } from "../../components/Card";
-import { SearchBox } from "../../components/Form/SearchBox";
-import { Header } from "../../components/Header";
 import { ModalTaskDetail } from "../../components/Modal/ModalTaskDetail";
 import { AuthContext } from "../../contexts/AuthContext";
 import { TasksContext } from "../../contexts/TasksContext";
+import { FirstTask } from "./FirstTask";
+import { NotFound } from "./NotFound";
+import { TaskList } from "./TaskList";
 interface Task {
   id: string;
   title: string;
@@ -16,7 +16,7 @@ interface Task {
 export const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const { signOut, user, accessToken } = useContext(AuthContext);
-  const { tasks, loadTasks } = useContext(TasksContext);
+  const { tasks, loadTasks, notFound, taskNotFound } = useContext(TasksContext);
 
   const [selectedTask, setSelectedTask] = useState<Task>({} as Task);
 
@@ -39,6 +39,17 @@ export const Dashboard = () => {
     onTaskDetailOpen();
   };
 
+  if (notFound) {
+    return (
+      <NotFound
+        isTaskDetailOpen={isTaskDetailOpen}
+        onTaskDetailClose={onTaskDetailClose}
+        selectedTask={selectedTask}
+        taskNotFound={taskNotFound}
+      />
+    );
+  }
+
   return (
     <>
       <ModalTaskDetail
@@ -46,21 +57,11 @@ export const Dashboard = () => {
         onClose={onTaskDetailClose}
         task={selectedTask}
       />
-      <Box>
-        <Header />
-        <SearchBox />
-        <Grid
-          templateColumns="repeat(auto-fill, minmax(420px, 1fr))"
-          gap="10"
-          paddingX={["4", "8"]}
-          mt="8"
-          w="100%"
-        >
-          {tasks.map((task) => (
-            <Card key={task.id} task={task} action={handleClick} />
-          ))}
-        </Grid>
-      </Box>
+      {!loading && !tasks.length ? (
+        <FirstTask />
+      ) : (
+        <TaskList loading={loading} handleClick={handleClick} tasks={tasks} />
+      )}
     </>
   );
 };

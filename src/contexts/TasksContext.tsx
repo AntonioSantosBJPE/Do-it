@@ -30,6 +30,9 @@ interface TasksContextData {
     userId: string,
     accessToken: string
   ) => Promise<void>;
+  searchTask: (taskTitle: string, accessToken: string) => Promise<void>;
+  notFound: boolean;
+  taskNotFound: string;
 }
 
 export const TasksContext = createContext<TasksContextData>(
@@ -38,22 +41,22 @@ export const TasksContext = createContext<TasksContextData>(
 
 export const TasksProvider = ({ children }: TasksContextProps) => {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [notFound, setNotFound] = useState(false);
+  const [taskNotFound, setTaskNotFound] = useState("");
 
-  const loadTasks = useCallback(
-    async (userId: string, accessToken: string) => {
-      try {
-        const response = await api.get(`/tasks?userId=${userId}`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
-        setTasks(response.data);
-      } catch (error) {
-        console.log(error);
-      }
-    },
-    [tasks]
-  );
+  const loadTasks = useCallback(async (userId: string, accessToken: string) => {
+    try {
+      const response = await api.get(`/tasks?userId=${userId}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      setTasks(response.data);
+    } catch (error) {
+      console.log("loadTasks");
+      console.log(error);
+    }
+  }, []);
 
   const createTask = useCallback(
     async (data: Omit<Task, "id">, accessToken: string) => {
@@ -121,9 +124,36 @@ export const TasksProvider = ({ children }: TasksContextProps) => {
     [tasks]
   );
 
+  const searchTask = useCallback(
+    async (taskTitle: string, accessToken: string) => {
+      const response = await api.get(`/tasks?title_like=${taskTitle}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!response.data.length) {
+        setTaskNotFound(taskTitle);
+        setNotFound(true);
+        return;
+      }
+      setNotFound(false);
+      setTasks(response.data);
+    },
+    []
+  );
   return (
     <TasksContext.Provider
-      value={{ tasks, createTask, loadTasks, deleteTask, updateTask }}
+      value={{
+        tasks,
+        createTask,
+        loadTasks,
+        deleteTask,
+        updateTask,
+        searchTask,
+        notFound,
+        taskNotFound,
+      }}
     >
       {children}
     </TasksContext.Provider>

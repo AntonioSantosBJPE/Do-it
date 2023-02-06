@@ -3,11 +3,29 @@ import { FaSearch } from "react-icons/fa";
 import { theme } from "../../styles/theme";
 import { ModalCreateTask } from "../Modal/ModalCreateTask";
 import { Input } from "./input";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { useContext } from "react";
+import { TasksContext } from "../../contexts/TasksContext";
+import { AuthContext } from "../../contexts/AuthContext";
+
+interface SearchData {
+  title: string;
+}
 
 interface SearchBoxProps {}
 
 export const SearchBox = ({}: SearchBoxProps) => {
   const { isOpen, onClose, onOpen } = useDisclosure();
+  const { searchTask } = useContext(TasksContext);
+  const { accessToken } = useContext(AuthContext);
+
+  const { register, handleSubmit } = useForm<SearchData>({});
+
+  const handleSearch: SubmitHandler<SearchData> = ({ title }: SearchData) => {
+    searchTask(title, accessToken);
+  };
   return (
     <>
       <ModalCreateTask isOpen={isOpen} onClose={onClose} />
@@ -20,11 +38,11 @@ export const SearchBox = ({}: SearchBoxProps) => {
         borderBottomColor="gray.50"
         flexDirection={["column", "column", "row"]}
       >
-        <Flex as="form">
+        <Flex as="form" onSubmit={handleSubmit(handleSearch)}>
           <Input
             placeholder="Pesquisar por tarefa"
-            w={["75vw", "75vw", "35vw"]}
-            name="Title"
+            w={["100%", "100%", "35vw"]}
+            {...register("title")}
           />
           <Center
             as="button"
