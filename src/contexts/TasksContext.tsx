@@ -1,4 +1,4 @@
-import { AxiosResponse } from "axios";
+import { AxiosError, AxiosResponse } from "axios";
 import {
   createContext,
   ReactNode,
@@ -7,6 +7,7 @@ import {
   useState,
 } from "react";
 import { api } from "../services/api";
+import { AuthContext } from "./AuthContext";
 
 interface TasksContextProps {
   children: ReactNode;
@@ -35,6 +36,10 @@ interface TasksContextData {
   taskNotFound: string;
 }
 
+interface iDefaultErrorResponse {
+  message: string;
+}
+
 export const TasksContext = createContext<TasksContextData>(
   {} as TasksContextData
 );
@@ -43,6 +48,8 @@ export const TasksProvider = ({ children }: TasksContextProps) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [notFound, setNotFound] = useState(false);
   const [taskNotFound, setTaskNotFound] = useState("");
+
+  const { signOut } = useContext(AuthContext);
 
   const loadTasks = useCallback(async (userId: string, accessToken: string) => {
     try {
@@ -53,8 +60,15 @@ export const TasksProvider = ({ children }: TasksContextProps) => {
       });
       setTasks(response.data);
     } catch (error) {
-      console.log("loadTasks");
-      console.log(error);
+      const currentError = error as AxiosError<iDefaultErrorResponse>;
+      const errorType = currentError.response?.data;
+
+      if (errorType?.toString() === "jwt expired") {
+        signOut();
+      }
+      if (errorType?.toString() === "invalid signature") {
+        signOut();
+      }
     }
   }, []);
 
@@ -69,8 +83,15 @@ export const TasksProvider = ({ children }: TasksContextProps) => {
         .then((response: AxiosResponse<Task>) => {
           setTasks((oldTasks) => [...oldTasks, response.data]);
         })
-        .catch((err) => {
-          console.log(err);
+        .catch((error) => {
+          const currentError = error as AxiosError<iDefaultErrorResponse>;
+          const errorType = currentError.response?.data;
+          if (errorType?.toString() === "jwt expired") {
+            signOut();
+          }
+          if (errorType?.toString() === "invalid signature") {
+            signOut();
+          }
         });
     },
     []
@@ -88,8 +109,15 @@ export const TasksProvider = ({ children }: TasksContextProps) => {
           const filteredTasks = tasks.filter((task) => task.id !== taskId);
           setTasks(filteredTasks);
         })
-        .catch((err) => {
-          console.log(err);
+        .catch((error) => {
+          const currentError = error as AxiosError<iDefaultErrorResponse>;
+          const errorType = currentError.response?.data;
+          if (errorType?.toString() === "jwt expired") {
+            signOut();
+          }
+          if (errorType?.toString() === "invalid signature") {
+            signOut();
+          }
         });
     },
     [tasks]
@@ -117,8 +145,15 @@ export const TasksProvider = ({ children }: TasksContextProps) => {
           }
           setTasks(arrayTempTasks);
         })
-        .catch((err) => {
-          console.log(err);
+        .catch((error) => {
+          const currentError = error as AxiosError<iDefaultErrorResponse>;
+          const errorType = currentError.response?.data;
+          if (errorType?.toString() === "jwt expired") {
+            signOut();
+          }
+          if (errorType?.toString() === "invalid signature") {
+            signOut();
+          }
         });
     },
     [tasks]
