@@ -14,6 +14,7 @@ import { useContext } from "react";
 import { AuthContext } from "../../contexts/AuthContext";
 import { FiLogOut } from "react-icons/fi";
 import { theme } from "../../styles/theme";
+import { TasksContext } from "../../contexts/TasksContext";
 
 interface MenuProps {
   isOpen: boolean;
@@ -21,6 +22,7 @@ interface MenuProps {
 }
 export const Menu = ({ isOpen, onClose }: MenuProps) => {
   const { user, signOut } = useContext(AuthContext);
+  const { clearStateTasks } = useContext(TasksContext);
   return (
     <Drawer placement="top" onClose={onClose} isOpen={isOpen}>
       <DrawerOverlay mt="80px" />
@@ -41,7 +43,10 @@ export const Menu = ({ isOpen, onClose }: MenuProps) => {
               fontSize="2xl"
               borderRadius="md"
               as="button"
-              onClick={signOut}
+              onClick={() => {
+                signOut();
+                clearStateTasks();
+              }}
               _hover={{ cursor: "pointer" }}
             >
               <FiLogOut color={theme.colors.white} />

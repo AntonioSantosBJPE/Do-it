@@ -36,6 +36,7 @@ interface TasksContextData {
   searchTask: (taskTitle: string, accessToken: string) => Promise<void>;
   notFound: boolean;
   taskNotFound: string;
+  clearStateTasks: () => void;
 }
 
 interface iDefaultErrorResponse {
@@ -66,9 +67,11 @@ export const TasksProvider = ({ children }: TasksContextProps) => {
       const errorType = currentError.response?.data;
 
       if (errorType?.toString() === "jwt expired") {
+        clearStateTasks();
         signOut();
       }
       if (errorType?.toString() === "invalid signature") {
+        clearStateTasks();
         signOut();
       }
     }
@@ -100,9 +103,11 @@ export const TasksProvider = ({ children }: TasksContextProps) => {
           const currentError = error as AxiosError<iDefaultErrorResponse>;
           const errorType = currentError.response?.data;
           if (errorType?.toString() === "jwt expired") {
+            clearStateTasks();
             signOut();
           }
           if (errorType?.toString() === "invalid signature") {
+            clearStateTasks();
             signOut();
           }
         });
@@ -126,9 +131,11 @@ export const TasksProvider = ({ children }: TasksContextProps) => {
           const currentError = error as AxiosError<iDefaultErrorResponse>;
           const errorType = currentError.response?.data;
           if (errorType?.toString() === "jwt expired") {
+            clearStateTasks();
             signOut();
           }
           if (errorType?.toString() === "invalid signature") {
+            clearStateTasks();
             signOut();
           }
         });
@@ -167,9 +174,11 @@ export const TasksProvider = ({ children }: TasksContextProps) => {
           const currentError = error as AxiosError<iDefaultErrorResponse>;
           const errorType = currentError.response?.data;
           if (errorType?.toString() === "jwt expired") {
+            clearStateTasks();
             signOut();
           }
           if (errorType?.toString() === "invalid signature") {
+            clearStateTasks();
             signOut();
           }
         });
@@ -195,6 +204,10 @@ export const TasksProvider = ({ children }: TasksContextProps) => {
     },
     []
   );
+
+  const clearStateTasks = () => {
+    setTasks([]);
+  };
   return (
     <TasksContext.Provider
       value={{
@@ -206,6 +219,7 @@ export const TasksProvider = ({ children }: TasksContextProps) => {
         searchTask,
         notFound,
         taskNotFound,
+        clearStateTasks,
       }}
     >
       {children}
