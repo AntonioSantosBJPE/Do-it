@@ -18,6 +18,7 @@ interface Task {
   description: string;
   userId: string;
   completed: boolean;
+  createDate?: string;
 }
 
 interface CardProps {
@@ -67,7 +68,9 @@ export const Card = ({ task, action }: CardProps) => {
             borderRadius="5px"
             borderColor="gray.200"
             bgColor="white"
-            onClick={() => updateTask(task.id, user.id, accessToken)}
+            onClick={() =>
+              updateTask(task.id, user.id, accessToken, task.completed)
+            }
           >
             <FaCheck color={theme.colors.gray["300"]} />
           </Center>
@@ -80,7 +83,7 @@ export const Card = ({ task, action }: CardProps) => {
           mt="2.5"
           value={task.completed ? 100 : 10}
         />
-        <Text color="gray.200">07 March 2021</Text>
+        <Text color="gray.200"> Criado em: {task.createDate}</Text>
       </Box>
     </Box>
   );

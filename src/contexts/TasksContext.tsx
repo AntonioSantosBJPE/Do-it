@@ -19,6 +19,7 @@ interface Task {
   description: string;
   userId: string;
   completed: boolean;
+  createDate?: string;
 }
 
 interface TasksContextData {
@@ -29,7 +30,8 @@ interface TasksContextData {
   updateTask: (
     taskId: string,
     userId: string,
-    accessToken: string
+    accessToken: string,
+    taskCompleted: boolean
   ) => Promise<void>;
   searchTask: (taskTitle: string, accessToken: string) => Promise<void>;
   notFound: boolean;
@@ -72,8 +74,19 @@ export const TasksProvider = ({ children }: TasksContextProps) => {
     }
   }, []);
 
+  const dateFormat = (): string => {
+    let data = new Date(),
+      dia = data.getDate().toString(),
+      diaF = dia.length == 1 ? "0" + dia : dia,
+      mes = (data.getMonth() + 1).toString(),
+      mesF = mes.length == 1 ? "0" + mes : mes,
+      anoF = data.getFullYear();
+    return diaF + "/" + mesF + "/" + anoF;
+  };
+
   const createTask = useCallback(
     async (data: Omit<Task, "id">, accessToken: string) => {
+      data.createDate = dateFormat();
       await api
         .post("/tasks", data, {
           headers: {
@@ -124,11 +137,16 @@ export const TasksProvider = ({ children }: TasksContextProps) => {
   );
 
   const updateTask = useCallback(
-    async (taskId: string, userId: string, accessToken: string) => {
+    async (
+      taskId: string,
+      userId: string,
+      accessToken: string,
+      taskCompleted: boolean
+    ) => {
       await api
         .patch(
           `/tasks/${taskId}`,
-          { completed: true, userId },
+          { completed: !taskCompleted, userId },
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -141,7 +159,7 @@ export const TasksProvider = ({ children }: TasksContextProps) => {
           const searchId = arrayTempTasks.find((item) => item.id === taskId);
 
           if (searchId) {
-            searchId.completed = true;
+            searchId.completed = !taskCompleted;
           }
           setTasks(arrayTempTasks);
         })

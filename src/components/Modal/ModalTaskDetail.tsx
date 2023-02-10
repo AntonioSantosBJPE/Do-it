@@ -33,6 +33,7 @@ interface Task {
   description: string;
   userId: string;
   completed: boolean;
+  createDate?: string;
 }
 interface ModalTaskDetailProps {
   isOpen: boolean;
@@ -86,7 +87,7 @@ export const ModalTaskDetail = ({
                 borderColor="gray.200"
                 bgColor="white"
                 onClick={() => {
-                  updateTask(task.id, user.id, accessToken);
+                  updateTask(task.id, user.id, accessToken, task.completed);
                 }}
               >
                 <FaCheck color={theme.colors.gray["300"]} />
@@ -119,7 +120,7 @@ export const ModalTaskDetail = ({
               value={task.completed ? 100 : 10}
             />
             <Text color="gray.200" mt="4">
-              07 March 2021
+              Criado em: {task.createDate}
             </Text>
           </Box>
         </ModalContent>
